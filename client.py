@@ -2,7 +2,7 @@ import asyncio
 import aioconsole
 
 async def client():
-    reader, writer = await asyncio.open_connection('127.0.0.1', 8880)
+    reader, writer = await asyncio.open_connection('127.0.0.1', 8080)
 
     async def read_message():
         while True:

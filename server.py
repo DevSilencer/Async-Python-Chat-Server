@@ -3,6 +3,7 @@ import time
 import uuid
 
 conn_id = {}
+online_uids = []
 lock = asyncio.Lock()
 
 def generate_id():
@@ -11,11 +12,11 @@ def generate_id():
     return (timestamp >> 32) | (uid & 0xffff)
 
 def find_online_uid(writer, dic, uid):
+    global online_uids
     for k,v in dic.items():
-        writer.write('Online Users In Chat Room: ')
-        if k and k != uid:
-            writer.write(f'{k} '.encode('utf-8'))
-    writer.write('\n'.encode('utf-8'))
+        if k and (k not in online_uids):
+            online_uids.append(k)
+    writer.write(f'Online People in Room: {online_uids} '.encode('utf-8'))
 
 async def handle_client(reader, writer):
     client_id = generate_id()
@@ -27,8 +28,9 @@ async def handle_client(reader, writer):
 
 
     print(f'Client {client_id} connected from {addr}')
+    print(f'Online Peoples: {online_uids}')
 
-    writer.write(f'Your id is {client_id}\n'.encode('utf-8'))
+    writer.write(f'Your id is {client_id}'.encode('utf-8'))
     await writer.drain()
 
     try:
@@ -80,14 +82,15 @@ async def handle_client(reader, writer):
         async with lock:
             if client_id in conn_id:
                 del conn_id[client_id]
+                online_uids.remove(client_id)
 
         writer.close()
         await writer.wait_closed()
         print(f"Client {client_id} disconnected")
 
 async def main():
-    server = await asyncio.start_server(handle_client, '0.0.0.0', 8880)
-    print("Server running on 0.0.0.0:8880")
+    server = await asyncio.start_server(handle_client, '0.0.0.0', 8080)
+    print("Server running on 0.0.0.0:8080")
     async with server:
         await server.serve_forever()
 
