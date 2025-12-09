@@ -12,8 +12,9 @@ def generate_id():
 
 def find_online_uid(writer, dic, uid):
     for k,v in dic.items():
+        writer.write('Online Users In Chat Room: ')
         if k and k != uid:
-            writer.write(f'{k}\t'.encode('utf-8'))
+            writer.write(f'{k} '.encode('utf-8'))
     writer.write('\n'.encode('utf-8'))
 
 async def handle_client(reader, writer):
